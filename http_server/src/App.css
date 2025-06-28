@@ -70,13 +70,15 @@
   inset: 0;
   display: flex;
   z-index: 1;
+  /* 调整透明度，避免太高导致背景不显示 */
+  background: rgba(255, 255, 255, 0.2); /* 降低透明度，便于显示背景图片 */
 }
 
 .left-panel {
   flex: 1.2;
   min-width: 340px;
   max-width: 520px;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.473); /* 提高不透明度 */
   border-right: 1px solid #e5e5e5;
   display: flex;
   flex-direction: column;
@@ -86,7 +88,7 @@
 .right-panel {
   flex: 1;
   min-width: 320px;
-  background: rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.26); /* 提高不透明度 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,7 +146,7 @@
   transition: border 0.2s;
 }
 .chat-input-bar input:focus {
-  border: 1.5px solid #1677ff;
+  border: 1.5px solid #2702f7;
 }
 .chat-input-bar button {
   background: #1677ff;
@@ -168,10 +170,16 @@
   align-items: center;
   justify-content: flex-end;
   min-height: 400px;
+  height: 100%;
+  /* 让图片最大化利用可用空间 */
 }
 .sprite-img {
-  max-width: 220px;
-  max-height: 420px;
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  max-height: 90%;
+  display: block;
+  object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 2px 16px #0002;
   margin-bottom: 18px;
@@ -331,6 +339,26 @@
 }
 .modal-btn.cancel:hover {
   background: #e0e0e0;
+}
+
+/* 图片预览样式 */
+.img-preview-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.img-preview {
+  max-width: 96vw;
+  max-height: 96vh;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px #0008;
+  background: #fff;
+  cursor: auto;
 }
 
 @media (max-width: 900px) {

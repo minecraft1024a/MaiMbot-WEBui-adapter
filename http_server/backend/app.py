@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import subprocess
 import webbrowser
 import threading
@@ -10,7 +10,8 @@ import os
 import requests
 from loguru import logger
 from fastapi.responses import JSONResponse
-from peewee import SqliteDatabase, Model, CharField
+from peewee import SqliteDatabase, Model, CharField, TextField, DateTimeField
+from datetime import datetime
 
 app = FastAPI()
 
@@ -28,55 +29,73 @@ MESSAGES = []
 BACKGROUND_URL = ""
 SPRITE_URL = ""
 
-# 假设用内存模拟数据库
-USER_INFO = {"nickname": "web用户"}
-
-class Message(BaseModel):
-    from_user: str
-    text: str
-    nickname: str = None
-
-class BgSpriteUrl(BaseModel):
-    url: str
-
 # Peewee数据库初始化
 DB_PATH = os.path.join(os.path.dirname(__file__), 'chat.db')
 db = SqliteDatabase(DB_PATH)
 
-class UserInfo(Model):
-    nickname = CharField(null=False, unique=True)
+class ChatMessage(Model):
+    from_user = CharField()
+    text = TextField()
+    type = CharField()
+    image_b64 = TextField()
+    created_at = DateTimeField(default=datetime.now)
     class Meta:
         database = db
 
 # 启动时自动建表
 with db:
-    db.create_tables([UserInfo])
+    db.create_tables([ChatMessage])
+
+class Message(BaseModel):
+    from_user: str
+    text: Optional[str] = ""
+    type: Optional[str] = ""
+    image_b64: Optional[str] = ""
+
+class BgSpriteUrl(BaseModel):
+    url: str
 
 @app.get("/messages", response_model=List[Message])
 def get_messages():
-    return MESSAGES
+    # 查询所有消息，按时间排序
+    msgs = ChatMessage.select().order_by(ChatMessage.created_at.asc())
+    result = []
+    for m in msgs:
+        result.append({
+            "from_user": m.from_user or "",
+            "text": m.text or "",
+            "type": m.type or "",
+            "image_b64": m.image_b64 or ""
+        })
+    return result
 
 @app.post("/send_message")
 def send_message_from_web(msg: Message):
-    """前端专用：只存储web用户消息，并转发到/messages供适配器轮询"""
-    MESSAGES.append(msg)
-    logger.info(f"[后端] 前端消息: {msg.from_user}: {msg.text}")
-    # 自动转发到/messages（适配器路由）
-    try:
-        requests.post("http://127.0.0.1:8000/messages", json=msg.dict())
-        logger.info("[后端] 已转发到/messages")
-    except Exception as e:
-        logger.error(f"[后端] 自动转发到/messages失败: {e}")
+    ChatMessage.create(
+        from_user=msg.from_user or "",
+        text=msg.text or "",
+        type=msg.type or "",
+        image_b64=msg.image_b64 or ""
+    )
+    logger.info(f"[后端] 前端消息: {msg.from_user}: {msg.text if msg.text else '[图片]'}")
     return {"success": True}
 
 @app.post("/messages")
 def post_message(msg: Message):
-    """适配器专用：只存储来自适配器的消息，不被前端直接调用"""
-    MESSAGES.append(msg)
+    ChatMessage.create(
+        from_user=msg.from_user or "",
+        text=msg.text or "",
+        type=msg.type or "",
+        image_b64=msg.image_b64 or ""
+    )
     return {"success": True}
 
 @app.get("/background")
 def get_background():
+    # 如果是base64，直接返回
+    if BACKGROUND_URL and BACKGROUND_URL.startswith("data:image/"):
+        return {"url": BACKGROUND_URL}
+    # 否则当作普通url
     return {"url": BACKGROUND_URL}
 
 @app.post("/background")
@@ -87,6 +106,8 @@ def set_background(data: BgSpriteUrl):
 
 @app.get("/sprite")
 def get_sprite():
+    if SPRITE_URL and SPRITE_URL.startswith("data:image/"):
+        return {"url": SPRITE_URL}
     return {"url": SPRITE_URL}
 
 @app.post("/sprite")
@@ -94,20 +115,6 @@ def set_sprite(data: BgSpriteUrl):
     global SPRITE_URL
     SPRITE_URL = data.url
     return {"success": True}
-
-@app.get("/get_nickname")
-def get_nickname():
-    user = UserInfo.select().first()
-    return {"nickname": user.nickname if user else "web用户"}
-
-@app.post("/set_nickname")
-def set_nickname(data: dict = Body(...)):
-    nickname = data.get("nickname", "web用户")
-    user, created = UserInfo.get_or_create(nickname=nickname)
-    if not created:
-        user.nickname = nickname
-        user.save()
-    return JSONResponse({"success": True, "nickname": user.nickname})
 
 @app.on_event("startup")
 def open_frontend():
