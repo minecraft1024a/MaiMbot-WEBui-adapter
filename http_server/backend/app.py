@@ -42,9 +42,35 @@ class ChatMessage(Model):
     class Meta:
         database = db
 
+class BackgroundConfig(Model):
+    key = CharField(primary_key=True)
+    value = TextField()
+    class Meta:
+        database = db
+
+class SpriteConfig(Model):
+    key = CharField(primary_key=True)
+    value = TextField()
+    class Meta:
+        database = db
+
 # 启动时自动建表
 with db:
-    db.create_tables([ChatMessage])
+    db.create_tables([ChatMessage, BackgroundConfig, SpriteConfig])
+
+# 启动时从数据库加载背景
+row = BackgroundConfig.get_or_none(BackgroundConfig.key == 'background_url')
+if row:
+    BACKGROUND_URL = row.value
+else:
+    BACKGROUND_URL = ""
+
+# 启动时从数据库加载立绘
+row = SpriteConfig.get_or_none(SpriteConfig.key == 'sprite_url')
+if row:
+    SPRITE_URL = row.value
+else:
+    SPRITE_URL = ""
 
 class Message(BaseModel):
     from_user: str
@@ -90,6 +116,14 @@ def post_message(msg: Message):
     )
     return {"success": True}
 
+@app.post("/background")
+def set_background(data: BgSpriteUrl):
+    global BACKGROUND_URL
+    BACKGROUND_URL = data.url
+    # 存储到数据库
+    BackgroundConfig.insert(key='background_url', value=BACKGROUND_URL).on_conflict_replace().execute()
+    return {"success": True}
+
 @app.get("/background")
 def get_background():
     # 如果是base64，直接返回
@@ -98,10 +132,12 @@ def get_background():
     # 否则当作普通url
     return {"url": BACKGROUND_URL}
 
-@app.post("/background")
-def set_background(data: BgSpriteUrl):
-    global BACKGROUND_URL
-    BACKGROUND_URL = data.url
+@app.post("/sprite")
+def set_sprite(data: BgSpriteUrl):
+    global SPRITE_URL
+    SPRITE_URL = data.url
+    # 存储到数据库
+    SpriteConfig.insert(key='sprite_url', value=SPRITE_URL).on_conflict_replace().execute()
     return {"success": True}
 
 @app.get("/sprite")
@@ -109,12 +145,6 @@ def get_sprite():
     if SPRITE_URL and SPRITE_URL.startswith("data:image/"):
         return {"url": SPRITE_URL}
     return {"url": SPRITE_URL}
-
-@app.post("/sprite")
-def set_sprite(data: BgSpriteUrl):
-    global SPRITE_URL
-    SPRITE_URL = data.url
-    return {"success": True}
 
 @app.on_event("startup")
 def open_frontend():
