@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 
-const Toolbar = ({ onChangeBackground, onChangeSprite }) => {
+const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase }) => {
   const [modal, setModal] = useState({ type: '', visible: false });
 
   const openModal = (type) => setModal({ type, visible: true });
@@ -23,9 +23,9 @@ const Toolbar = ({ onChangeBackground, onChangeSprite }) => {
         title={modal.type === 'bg' ? '选择或输入背景图片' : '选择或输入立绘图片'}
         placeholder={modal.type === 'bg' ? '背景图片URL' : '立绘图片URL'}
         onOk={async (value) => {
-          if (!value) return;
+          if (!value || !apiBase) return;
           if (modal.type === 'bg' && onChangeBackground) {
-            await fetch('http://127.0.0.1:8050/background', {
+            await fetch(`${apiBase}/background`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ url: value })
@@ -34,7 +34,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite }) => {
             closeModal();
           }
           if (modal.type === 'sprite' && onChangeSprite) {
-            await fetch('http://127.0.0.1:8050/sprite', {
+            await fetch(`${apiBase}/sprite`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ url: value })
