@@ -1,0 +1,7 @@
+# 适配器配置文件
+# ws_url: MaiBot Core 的 WebSocket 地址
+# http_backend_url: 你的http后端API根地址
+ws_url: ws://127.0.0.1:8000/ws
+http_backend_url: http://127.0.0.1:8000
+poll_interval: 2
+platform_id: maimai_http_adapter
