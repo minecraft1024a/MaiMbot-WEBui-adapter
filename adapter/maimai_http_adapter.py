@@ -9,6 +9,7 @@ from maim_message import (
 import os
 from loguru import logger
 import httpx
+import sqlite3
 
 # 读取配置
 with open(os.path.join(os.path.dirname(__file__), 'config.yaml'), encoding='utf-8') as f:
@@ -60,6 +61,7 @@ def parse_maibot_message(message):
     msg_type = 'text'
     nickname = None
     from_user = 'maimai'
+    session_id = None
     # dict结构
     if isinstance(message, dict):
         segments = message.get('message_segment', [])
@@ -88,12 +90,16 @@ def parse_maibot_message(message):
         if hasattr(message, 'message_info') and hasattr(message.message_info, 'user_info'):
             nickname = "maimai"
             from_user = 'maimai'
+    # 尝试从 message.extra 取 session_id
+    if hasattr(message, 'extra') and isinstance(message.extra, dict):
+        session_id = message.extra.get('session_id')
     return {
         'type': msg_type,
         'text': text,
         'image_b64': image_b64,
         'nickname': nickname,
-        'from_user': from_user
+        'from_user': from_user,
+        'session_id': session_id
     }
 
 async def handle_from_maibot(message: MessageBase):
@@ -101,19 +107,37 @@ async def handle_from_maibot(message: MessageBase):
     try:
         parsed = parse_maibot_message(message)
         logger.info(f"[MaiBot] 收到消息: {parsed}")
+        # 取 session_id，优先 extra 里的
+        session_id = parsed.get('session_id') or 'default'
+        extra = {'type': parsed['type']} if parsed['type'] == 'image' else {}
         if parsed['type'] == 'image' and parsed['image_b64']:
-            await send_to_backend('', from_user=parsed['from_user'], nickname=parsed['nickname'], extra={'type': 'image', 'image_b64': parsed['image_b64']})
-        else:
-            await send_to_backend(parsed['text'], from_user=parsed['from_user'], nickname=parsed['nickname'])
+            extra['image_b64'] = parsed['image_b64']
+        extra['session_id'] = session_id
+        await send_to_backend(parsed['text'], from_user=parsed['from_user'], nickname=parsed['nickname'], extra=extra)
         logger.info(f"[Adapter] 正在转发MaiBot Core消息到后端: {parsed}")
     except Exception as e:
         logger.error(f"[Adapter] 处理MaiBot Core消息转发到后端时出错: {e}")
 
 router.register_class_handler(handle_from_maibot)
 
+# 连接原有 chat.db，增加 session_group 映射表
+DB_PATH = os.path.join(os.path.dirname(__file__), '../http_server/backend/chat.db')
+session_db = sqlite3.connect(DB_PATH)
+session_db.execute('CREATE TABLE IF NOT EXISTS session_group (session_id TEXT PRIMARY KEY, group_id TEXT)')
+session_db.commit()
+
+def get_or_create_group_id(session_id):
+    cur = session_db.execute('SELECT group_id FROM session_group WHERE session_id=?', (session_id,))
+    row = cur.fetchone()
+    if row:
+        return row[0]
+    group_id = session_id  # 你也可以用 uuid 或自增ID
+    session_db.execute('INSERT INTO session_group (session_id, group_id) VALUES (?, ?)', (session_id, group_id))
+    session_db.commit()
+    return group_id
+
 # 轮询http后端新消息并转发到MaiBot Core（http后端到下游）
 async def poll_and_send():
-    # 启动时先同步一次，避免历史消息重复转发
     try:
         resp = requests.get(f"{HTTP_BACKEND}/messages")
         msgs = resp.json()
@@ -135,14 +159,16 @@ async def poll_and_send():
                 # 跳过自己发出的消息，防止循环转发
                 if (msg.get("nickname") == "maimai" ) or (msg.get("from_user") == "maimai" ):
                     continue
-                logger.info(f"[Adapter] 正在转发后端消息到MaiBot Core: from_user={msg.get('from_user')}, nickname={msg.get('nickname')}, text={msg.get('text')}, type={msg.get('type')}")
+                session_id = msg.get("session_id", "default")
+                group_id = get_or_create_group_id(session_id)
                 user_info = UserInfo(platform=PLATFORM_ID, user_id=msg.get("from_user", "web"), user_nickname=msg.get("nickname") or "web用户")
+                group_info = GroupInfo(platform=PLATFORM_ID, group_id=group_id, group_name=f"会话{group_id}")
                 message_info = BaseMessageInfo(
                     platform=PLATFORM_ID,
                     message_id=str(time.time()),
                     time=time.time(),
                     user_info=user_info,
-                    group_info=None,
+                    group_info=group_info,
                     format_info={"content_format": ["text"], "accept_format": ["text", "image"]}
                 )
                 # 适配图片消息
@@ -159,6 +185,10 @@ async def poll_and_send():
                         logger.warning(f"[Adapter] 跳过空消息: {msg}")
                         continue
                 message = MessageBase(message_info=message_info, message_segment=seg)
+                # 在 message 对象中附加 session_id，便于下游回传
+                if not hasattr(message, 'extra'):
+                    message.extra = {}
+                message.extra['session_id'] = session_id
                 await router.send_message(message)
             last_len = len(msgs)
         except Exception as e:
