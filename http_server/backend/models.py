@@ -64,6 +64,24 @@ class AvatarConfig(BaseModel):
         table_name = 'avatar_config'
 
 
+class ThemeConfig(BaseModel):
+    """主题配置模型"""
+    key = CharField(primary_key=True, default='theme')
+    value = CharField(default='auto', help_text='主题设置: light, dark, auto')
+    
+    class Meta:
+        table_name = 'theme_config'
+
+
+class ApiKeyConfig(BaseModel):
+    """API密钥配置模型"""
+    key = CharField(primary_key=True, help_text='密钥名称')
+    value = TextField(help_text='密钥值')
+    
+    class Meta:
+        table_name = 'api_key_config'
+
+
 def initialize_database():
     """初始化数据库"""
     with db:
@@ -71,7 +89,9 @@ def initialize_database():
             ChatMessage, 
             BackgroundConfig, 
             SpriteConfig, 
-            AvatarConfig
+            AvatarConfig,
+            ThemeConfig,
+            ApiKeyConfig
         ], safe=True)
 
 
@@ -82,5 +102,7 @@ __all__ = [
     'BackgroundConfig', 
     'SpriteConfig',
     'AvatarConfig',
+    'ThemeConfig',
+    'ApiKeyConfig',
     'initialize_database'
 ]

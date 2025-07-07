@@ -264,6 +264,7 @@ function App() {
         onChangeBackground={handleChangeBackground}
         onChangeSprite={handleChangeSprite}
         onAvatarConfig={() => setShowAvatarModal(true)}
+        onOpenSettings={() => setShowSettingsPanel(true)}
         apiBase={apiBase}
       />
       
@@ -274,6 +275,14 @@ function App() {
         onSave={handleSaveAvatarConfig}
         initialConfig={avatarConfig}
       />
+      
+      {/* 设置面板 */}
+      {showSettingsPanel && (
+        <SettingsPanel
+          onClose={() => setShowSettingsPanel(false)}
+          apiBase={apiBase}
+        />
+      )}
     </div>
   )
 }

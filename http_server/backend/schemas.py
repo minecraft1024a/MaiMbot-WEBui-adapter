@@ -48,3 +48,30 @@ class StandardResponse(BaseModel):
     success: bool = Field(True, description="操作是否成功")
     message: Optional[str] = Field(None, description="响应消息")
     data: Optional[Any] = Field(None, description="响应数据")
+
+
+class ThemeRequest(BaseModel):
+    """主题设置请求模型"""
+    theme: str = Field(..., description="主题模式: light, dark, auto")
+
+
+class ThemeResponse(BaseModel):
+    """主题响应模型"""
+    theme: str
+
+
+class ApiKeyRequest(BaseModel):
+    """API密钥请求模型"""
+    key: str = Field(..., description="密钥名称")
+    value: str = Field(..., description="密钥值")
+
+
+class ApiKeyResponse(BaseModel):
+    """API密钥响应模型"""
+    key: str
+    value: str
+
+
+class ApiKeysResponse(BaseModel):
+    """API密钥列表响应模型"""
+    keys: List[ApiKeyResponse]

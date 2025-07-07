@@ -6,7 +6,7 @@ from loguru import logger
 
 from backend.models import (
     ChatMessage, BackgroundConfig, SpriteConfig, 
-    AvatarConfig, db
+    AvatarConfig, ThemeConfig, ApiKeyConfig, db
 )
 from backend.schemas import MessageRequest, MessageResponse
 
@@ -151,4 +151,117 @@ class ConfigService:
             return True
         except Exception as e:
             logger.error(f"设置头像配置失败: {e}")
+            return False
+
+
+class ThemeService:
+    """主题服务"""
+    
+    @staticmethod
+    def get_theme() -> str:
+        """获取主题配置"""
+        try:
+            config = ThemeConfig.get_or_none(ThemeConfig.key == 'theme')
+            return config.value if config else 'auto'
+        except Exception as e:
+            logger.error(f"获取主题配置失败: {e}")
+            return 'auto'
+    
+    @staticmethod
+    def set_theme(theme: str) -> bool:
+        """设置主题配置"""
+        try:
+            ThemeConfig.insert(
+                key='theme',
+                value=theme
+            ).on_conflict_replace().execute()
+            logger.info(f"主题设置成功: {theme}")
+            return True
+        except Exception as e:
+            logger.error(f"设置主题配置失败: {e}")
+            return False
+
+
+class ApiKeyService:
+    """API密钥服务"""
+    
+    @staticmethod
+    def get_api_key(key: str) -> str:
+        """获取API密钥"""
+        try:
+            config = ApiKeyConfig.get_or_none(ApiKeyConfig.key == key)
+            return config.value if config else ''
+        except Exception as e:
+            logger.error(f"获取API密钥失败: {e}")
+            return ''
+    
+    @staticmethod
+    def set_api_key(key: str, value: str) -> bool:
+        """设置API密钥"""
+        try:
+            ApiKeyConfig.insert(
+                key=key,
+                value=value
+            ).on_conflict_replace().execute()
+            logger.info(f"API密钥设置成功: {key}")
+            return True
+        except Exception as e:
+            logger.error(f"设置API密钥失败: {e}")
+            return False
+    
+    @staticmethod
+    def get_all_api_keys() -> List[Dict[str, str]]:
+        """获取所有API密钥"""
+        try:
+            configs = ApiKeyConfig.select()
+            return [{"key": config.key, "value": config.value} for config in configs]
+        except Exception as e:
+            logger.error(f"获取所有API密钥失败: {e}")
+            return []
+
+
+class DatabaseService:
+    """数据库服务"""
+    
+    @staticmethod
+    def clear_data() -> bool:
+        """清空数据"""
+        try:
+            # 清空所有表的数据，但保留表结构
+            ChatMessage.delete().execute()
+            BackgroundConfig.delete().execute()
+            SpriteConfig.delete().execute()
+            AvatarConfig.delete().execute()
+            ThemeConfig.delete().execute()
+            ApiKeyConfig.delete().execute()
+            
+            logger.info("数据清空成功")
+            return True
+        except Exception as e:
+            logger.error(f"数据清空失败: {e}")
+            return False
+    
+    @staticmethod
+    def clear_database() -> bool:
+        """删除数据库文件"""
+        try:
+            import os
+            from backend.config import config
+            
+            # 关闭数据库连接
+            db.close()
+            
+            # 删除数据库文件
+            if os.path.exists(config.database_url):
+                os.remove(config.database_url)
+                logger.info(f"数据库文件删除成功: {config.database_url}")
+            
+            # 重新初始化数据库
+            from backend.models import initialize_database
+            initialize_database()
+            
+            logger.info("数据库重新初始化成功")
+            return True
+        except Exception as e:
+            logger.error(f"删除数据库文件失败: {e}")
             return False

@@ -6,9 +6,10 @@ from typing import List
 
 from backend.schemas import (
     MessageRequest, MessageResponse, UrlRequest, UrlResponse,
-    AvatarConfigRequest, AvatarConfigResponse, StandardResponse
+    AvatarConfigRequest, AvatarConfigResponse, StandardResponse,
+    ThemeRequest, ThemeResponse, ApiKeyRequest, ApiKeyResponse, ApiKeysResponse
 )
-from backend.services import ChatService, ConfigService
+from backend.services import ChatService, ConfigService, ThemeService, ApiKeyService, DatabaseService
 
 
 # 创建路由器
@@ -84,4 +85,61 @@ async def set_avatar_config(data: AvatarConfigRequest):
     return StandardResponse(
         success=success,
         message="头像配置成功" if success else "头像配置失败"
+    )
+
+
+# 主题相关API
+@api_router.get("/theme", response_model=ThemeResponse)
+async def get_theme():
+    """获取主题配置"""
+    theme = ThemeService.get_theme()
+    return ThemeResponse(theme=theme)
+
+
+@api_router.post("/theme", response_model=StandardResponse)
+async def set_theme(data: ThemeRequest):
+    """设置主题配置"""
+    success = ThemeService.set_theme(data.theme)
+    return StandardResponse(
+        success=success,
+        message="主题设置成功" if success else "主题设置失败"
+    )
+
+
+# API密钥相关API
+@api_router.get("/api_keys", response_model=ApiKeysResponse)
+async def get_api_keys():
+    """获取所有API密钥"""
+    keys = ApiKeyService.get_all_api_keys()
+    return ApiKeysResponse(keys=keys)
+
+
+@api_router.post("/api_key", response_model=StandardResponse)
+async def set_api_key(data: ApiKeyRequest):
+    """设置API密钥"""
+    success = ApiKeyService.set_api_key(data.key, data.value)
+    return StandardResponse(
+        success=success,
+        message="API密钥设置成功" if success else "API密钥设置失败"
+    )
+
+
+# 数据库管理API
+@api_router.post("/database/clear", response_model=StandardResponse)
+async def clear_database():
+    """清空数据"""
+    success = DatabaseService.clear_data()
+    return StandardResponse(
+        success=success,
+        message="数据清空成功" if success else "数据清空失败"
+    )
+
+
+@api_router.delete("/database", response_model=StandardResponse)
+async def delete_database():
+    """删除数据库"""
+    success = DatabaseService.clear_database()
+    return StandardResponse(
+        success=success,
+        message="数据库删除成功" if success else "数据库删除失败"
     )
