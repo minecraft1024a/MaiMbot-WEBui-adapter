@@ -1,0 +1,18 @@
+[adapter]
+# 适配器配置
+platform_id = "maimai_http_adapter"
+poll_interval = 2
+
+[connection]
+# WebSocket连接配置
+ws_url = "ws://127.0.0.1:8000/ws"
+# HTTP后端API地址
+http_backend_url = "http://127.0.0.1:8050"
+
+[database]
+# 数据库配置
+db_path = "../http_server/backend/chat.db"
+
+[logging]
+# 日志配置
+level = "INFO"
