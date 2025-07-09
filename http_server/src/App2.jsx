@@ -5,7 +5,6 @@ import Background from './components/Background'
 import Toolbar from './components/Toolbar'
 import AvatarConfigModal from './components/AvatarConfigModal'
 import SessionSelector from './components/SessionSelector'
-import SettingsPanel from './components/SettingsPanel'
 import './App.css'
 
 function App() {
@@ -16,7 +15,6 @@ function App() {
   const [apiBase, setApiBase] = useState('')
   const [sessionId, setSessionId] = useState('default')
   const [showAvatarModal, setShowAvatarModal] = useState(false)
-  const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   
   // 头像配置状态
   const [avatarConfig, setAvatarConfig] = useState(() => {
@@ -264,7 +262,6 @@ function App() {
         onChangeBackground={handleChangeBackground}
         onChangeSprite={handleChangeSprite}
         onAvatarConfig={() => setShowAvatarModal(true)}
-        onOpenSettings={() => setShowSettingsPanel(true)}
         apiBase={apiBase}
       />
       
@@ -275,14 +272,6 @@ function App() {
         onSave={handleSaveAvatarConfig}
         initialConfig={avatarConfig}
       />
-      
-      {/* 设置面板 */}
-      {showSettingsPanel && (
-        <SettingsPanel
-          onClose={() => setShowSettingsPanel(false)}
-          apiBase={apiBase}
-        />
-      )}
     </div>
   )
 }
