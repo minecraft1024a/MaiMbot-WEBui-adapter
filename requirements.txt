@@ -1,0 +1,19 @@
+# HTTP适配器依赖
+requests>=2.28.0
+httpx>=0.24.0
+loguru>=0.6.0
+# TOML配置文件支持 (Python 3.11+ 内置tomllib)
+# 如果使用Python 3.10及以下版本，请取消下面的注释
+# tomli>=2.0.0
+# FastAPI 核心依赖
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
+# 数据库相关
+peewee>=3.17.0
+
+# 日志和工具
+loguru>=0.7.2
+
+# CORS 支持 (已包含在 fastapi 中)
+# python-multipart  # 如果需要文件上传支持可添加

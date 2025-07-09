@@ -1,7 +1,0 @@
-# HTTP适配器依赖
-requests>=2.28.0
-httpx>=0.24.0
-loguru>=0.6.0
-# TOML配置文件支持 (Python 3.11+ 内置tomllib)
-# 如果使用Python 3.10及以下版本，请取消下面的注释
-# tomli>=2.0.0
