@@ -1,4 +1,4 @@
-# HTTP适配器依赖
+﻿# HTTP适配器依赖
 requests>=2.28.0
 httpx>=0.24.0
 loguru>=0.6.0
