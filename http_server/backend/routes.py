@@ -1,9 +1,10 @@
 """
 API路由定义
 """
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, WebSocket, WebSocketDisconnect
 from typing import List
 
+from backend.connection_manager import manager
 from backend.schemas import (
     MessageRequest, MessageResponse, UrlRequest, UrlResponse,
     AvatarConfigRequest, AvatarConfigResponse, StandardResponse,
@@ -24,12 +25,15 @@ async def get_messages(request: Request):
     return messages
 
 
-@api_router.post("/messages", response_model=StandardResponse)
 @api_router.post("/send_message", response_model=StandardResponse)
 async def send_message(message: MessageRequest, request: Request):
     """发送消息"""
     session_id = request.query_params.get('session_id', 'default')
     success = ChatService.send_message(message, session_id)
+
+    if success:
+        # 广播新消息
+        await manager.broadcast(message.dict(), session_id)
     
     return StandardResponse(
         success=success,
@@ -143,3 +147,16 @@ async def delete_database():
         success=success,
         message="数据库删除成功" if success else "数据库删除失败"
     )
+
+
+@api_router.websocket("/ws/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    await manager.connect(websocket, session_id)
+    try:
+        while True:
+            # 在这里，我们只是保持连接打开以接收广播
+            # 客户端不需要通过这个WebSocket发送消息
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, session_id)
+        print(f"Client #{session_id} disconnected")

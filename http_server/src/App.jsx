@@ -73,47 +73,83 @@ function App() {
     loadConfigurations()
   }, [apiBase, sessionId])
 
-  // 定期拉取消息
+  // 加载历史消息
   useEffect(() => {
-    if (!apiBase) return
+    if (!apiBase) return;
 
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`${apiBase}/messages?session_id=${sessionId}`)
-        const data = await response.json()
+        const response = await fetch(`${apiBase}/messages?session_id=${sessionId}`);
+        const data = await response.json();
         
         const formattedMessages = data.map(msg => {
-          const isFromWeb = msg.from_user === 'web'
-          
-          // 处理图片消息
+          const isFromWeb = msg.from_user === 'web';
           if (msg.type === 'image' || msg.image_b64) {
-            const imageData = msg.image_b64 || msg.text
+            const imageData = msg.image_b64 || msg.text;
             return {
               from: isFromWeb ? 'me' : 'other',
               text: '',
               image: imageData ? `data:image/png;base64,${imageData}` : undefined
-            }
+            };
           }
-          
-          // 处理文本消息
           return {
             from: isFromWeb ? 'me' : 'other',
             text: msg.text || ''
-          }
-        })
+          };
+        });
         
-        setMessages(formattedMessages)
+        setMessages(formattedMessages);
       } catch (error) {
-        console.error('Failed to fetch messages:', error)
+        console.error('Failed to fetch messages:', error);
       }
-    }
+    };
 
-    // 立即获取一次，然后每2秒获取一次
-    fetchMessages()
-    const interval = setInterval(fetchMessages, 2000)
-    
-    return () => clearInterval(interval)
-  }, [apiBase, sessionId])
+    fetchMessages();
+  }, [apiBase, sessionId]);
+
+  // WebSocket连接
+  useEffect(() => {
+    if (!apiBase) return;
+
+    const wsUrl = apiBase.replace(/^http/, 'ws') + `/ws/${sessionId}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      
+      const isFromWeb = msg.from_user === 'web';
+      // 如果是自己发送的消息，我们已经通过乐观更新添加了，所以忽略
+      if (isFromWeb) return;
+
+      let newMessage;
+      if (msg.type === 'image' || msg.image_b64) {
+        const imageData = msg.image_b64 || msg.text;
+        newMessage = {
+          from: 'other',
+          text: '',
+          image: imageData ? `data:image/png;base64,${imageData}` : undefined
+        };
+      } else {
+        newMessage = {
+          from: 'other',
+          text: msg.text || ''
+        };
+      }
+      setMessages(prev => [...prev, newMessage]);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [apiBase, sessionId]);
 
   // 发送文本消息
   const handleSendMessage = useCallback(async (text) => {
