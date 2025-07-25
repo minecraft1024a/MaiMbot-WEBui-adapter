@@ -27,7 +27,6 @@ async def lifespan(app: FastAPI):
     # 启动前端服务
     frontend_launcher = FrontendLauncher()
     frontend_launcher.start_frontend()
-    logger.info("✅ 前端服务启动完成")
     
     yield
     

@@ -56,13 +56,14 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #1a2b38; /* 更深的文本颜色以增强对比度 */
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    color: #6a73ff; /* 调整链接悬停颜色 */
   }
   button {
-    background-color: #f9f9f9;
+    background-color: #efefef; /* 按钮背景稍暗 */
+    border: 1px solid #ddd; /* 为按钮添加边框 */
   }
 }

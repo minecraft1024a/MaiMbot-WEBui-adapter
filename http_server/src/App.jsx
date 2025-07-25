@@ -6,6 +6,7 @@ import Toolbar from './components/Toolbar'
 import AvatarConfigModal from './components/AvatarConfigModal'
 import SessionSelector from './components/SessionSelector'
 import SettingsPanel from './components/SettingsPanel'
+import { themeAPI } from './utils/api'
 import './App.css'
 
 function App() {
@@ -262,6 +263,42 @@ function App() {
   const handleSwitchSession = useCallback((id) => {
     setSessionId(id)
     setMessages([]) // 清空消息，等待新会话消息加载
+  }, [])
+
+  // 应用主题设置
+  const updateTheme = (theme) => {
+    const root = document.documentElement
+    
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark')
+    } else if (theme === 'light') {
+      root.setAttribute('data-theme', 'light')
+    } else {
+      // 跟随系统
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+    }
+  }
+
+  // 加载并应用主题
+  useEffect(() => {
+    const loadAndApplyTheme = async () => {
+      try {
+        const response = await themeAPI.get()
+        if (response.theme) {
+          updateTheme(response.theme)
+        } else {
+          // 如果没有设置主题，则默认跟随系统
+          updateTheme('auto')
+        }
+      } catch (error) {
+        console.error('加载主题失败:', error)
+        // 加载失败时也默认跟随系统
+        updateTheme('auto')
+      }
+    }
+    
+    loadAndApplyTheme()
   }, [])
 
   return (

@@ -1,22 +1,22 @@
 /* CSS变量定义 - 主题色彩 */
 :root {
   /* 浅色主题变量 */
-  --bg-primary: #f7f8fa;
-  --bg-secondary: rgba(255, 255, 255, 0.85);
-  --bg-tertiary: rgba(255, 255, 255, 0.6);
-  --bg-panel: rgba(255, 255, 255, 0.9);
-  --text-primary: #2c3e50;
-  --text-secondary: #7f8c8d;
-  --text-tertiary: #95a5a6;
-  --border-color: rgba(44, 62, 80, 0.1);
-  --shadow-color: rgba(44, 62, 80, 0.08);
-  --gradient-primary: linear-gradient(135deg, #5ee7df 0%, #b490ca 100%);
+  --bg-primary: #fcfcfc;
+  --bg-secondary: rgba(255, 255, 255, 0.9);
+  --bg-tertiary: rgba(255, 255, 255, 0.7);
+  --bg-panel: rgba(255, 255, 255, 0.95);
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-color: rgba(90, 90, 90, 0.1);
+  --gradient-primary: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
   
   /* 消息气泡颜色 */
-  --user-bubble-color: #3498db;
+  --user-bubble-color: #007aff;
   --bot-bubble-color: #ffffff;
   --user-text-color: #ffffff;
-  --bot-text-color: #2c3e50;
+  --bot-text-color: #333333;
 }
 
 /* 深色主题 */
