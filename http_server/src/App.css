@@ -358,6 +358,8 @@
   padding: 20px;
   scrollbar-width: thin;
   scrollbar-color: rgba(103, 126, 234, 0.3) transparent;
+  min-height: 0;
+  height: calc(100% - 60px);
 }
 
 .chat-messages::-webkit-scrollbar {
