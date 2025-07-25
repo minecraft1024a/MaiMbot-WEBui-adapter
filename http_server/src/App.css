@@ -316,6 +316,7 @@
   z-index: 1;
   background: transparent;
   margin: 0;
+  overflow: hidden;
 }
 
 .left-panel {
@@ -329,6 +330,7 @@
   flex-direction: column;
   box-shadow: 4px 0 40px var(--shadow-color);
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .right-panel {
@@ -345,11 +347,13 @@
 
 /* 聊天面板样式 */
 .chat-panel {
+  flex: 1;
   display: flex;
   flex-direction: column;
   height: 100%;
   background: var(--bg-panel);
   backdrop-filter: blur(15px);
+  overflow: hidden; /* 防止子元素溢出 */
 }
 
 .chat-messages {
@@ -358,8 +362,7 @@
   padding: 20px;
   scrollbar-width: thin;
   scrollbar-color: rgba(103, 126, 234, 0.3) transparent;
-  min-height: 0;
-  height: calc(100% - 60px);
+  min-height: 0; /* 关键属性，防止flex item溢出 */
 }
 
 .chat-messages::-webkit-scrollbar {
