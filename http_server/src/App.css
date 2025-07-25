@@ -1,42 +1,42 @@
 /* CSS变量定义 - 主题色彩 */
 :root {
   /* 浅色主题变量 */
-  --bg-primary: #ffffff;
-  --bg-secondary: rgba(255, 255, 255, 0.9);
-  --bg-tertiary: rgba(255, 255, 255, 0.7);
-  --bg-panel: rgba(255, 255, 255, 0.8);
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --text-tertiary: #999999;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-primary: #f7f8fa;
+  --bg-secondary: rgba(255, 255, 255, 0.85);
+  --bg-tertiary: rgba(255, 255, 255, 0.6);
+  --bg-panel: rgba(255, 255, 255, 0.9);
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --text-tertiary: #95a5a6;
+  --border-color: rgba(44, 62, 80, 0.1);
+  --shadow-color: rgba(44, 62, 80, 0.08);
+  --gradient-primary: linear-gradient(135deg, #5ee7df 0%, #b490ca 100%);
   
   /* 消息气泡颜色 */
-  --user-bubble-color: #667eea;
-  --bot-bubble-color: #f0f0f0;
+  --user-bubble-color: #3498db;
+  --bot-bubble-color: #ffffff;
   --user-text-color: #ffffff;
-  --bot-text-color: #333333;
+  --bot-text-color: #2c3e50;
 }
 
 /* 深色主题 */
 [data-theme="dark"] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: rgba(42, 42, 62, 0.95);
-  --bg-tertiary: rgba(42, 42, 62, 0.8);
-  --bg-panel: rgba(42, 42, 62, 0.9);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-tertiary: rgba(255, 255, 255, 0.6);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --bg-primary: #1c1e26;
+  --bg-secondary: rgba(38, 41, 51, 0.85);
+  --bg-tertiary: rgba(38, 41, 51, 0.6);
+  --bg-panel: rgba(38, 41, 51, 0.9);
+  --text-primary: #e0e1e6;
+  --text-secondary: #a0a3af;
+  --text-tertiary: #767984;
+  --border-color: rgba(224, 225, 230, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.2);
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   
   /* 深色主题下的消息气泡颜色 */
-  --user-bubble-color: #667eea;
-  --bot-bubble-color: rgba(255, 255, 255, 0.1);
+  --user-bubble-color: #5865f2;
+  --bot-bubble-color: #2f3136;
   --user-text-color: #ffffff;
-  --bot-text-color: #ffffff;
+  --bot-text-color: #e0e1e6;
 }
 
 /* 深色主题下的特殊样式覆盖 */
@@ -110,15 +110,20 @@
 }
 
 /* 背景层 */
+@keyframes backgroundPan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .background-layer {
   position: absolute;
   inset: 0;
   background: var(--gradient-primary);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-size: 200% 200%;
   z-index: 0;
   transition: all 0.5s ease;
+  animation: backgroundPan 20s ease infinite;
 }
 
 /* 会话选择器 */
@@ -317,12 +322,13 @@
   flex: 1.2;
   min-width: 400px;
   max-width: 600px;
-  background: var(--bg-tertiary);
-  backdrop-filter: blur(20px);
+  background: var(--bg-panel);
+  backdrop-filter: blur(24px) saturate(180%);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 20px var(--shadow-color);
+  box-shadow: 4px 0 40px var(--shadow-color);
+  transition: all 0.3s ease;
 }
 
 .right-panel {
@@ -334,6 +340,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  transition: all 0.3s ease;
 }
 
 /* 聊天面板样式 */
@@ -450,11 +457,12 @@
 
 .message-bubble {
   position: relative;
-  padding: 12px 16px;
-  border-radius: 18px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 12px 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px var(--shadow-color);
   word-wrap: break-word;
-  animation: bubblePop 0.2s ease-out;
+  animation: bubblePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s ease;
 }
 
 @keyframes bubblePop {
@@ -471,13 +479,13 @@
 .message-bubble.me {
   background: var(--user-bubble-color);
   color: var(--user-text-color);
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 4px;
 }
 
 .message-bubble.other {
   background: var(--bot-bubble-color);
   color: var(--bot-text-color);
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 4px;
   border: 1px solid var(--border-color);
 }
 
@@ -510,23 +518,29 @@
 .input-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background: var(--bg-primary);
-  border-radius: 25px;
-  padding: 4px;
-  box-shadow: 0 2px 12px var(--shadow-color);
+  border-radius: 28px;
+  padding: 8px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.input-group:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
 }
 
 .message-input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 15px;
   background: transparent;
-  border-radius: 20px;
   font-family: inherit;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--text-primary);
 }
 
@@ -535,32 +549,31 @@
 }
 
 .attachment-btn, .send-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.attachment-btn {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  min-width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 44px;
+  height: 44px;
+}
+
+.attachment-btn {
+  background: transparent;
+  color: var(--text-secondary);
 }
 
 .attachment-btn:hover {
   background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .send-btn {
-  background: var(--gradient-primary);
+  background: #3498db;
   color: white;
-  min-width: 60px;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
 }
 
 .send-btn:hover:not(:disabled) {

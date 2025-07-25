@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Modal from './Modal'
+import { Image, User, Settings, Bot, UserCog } from 'lucide-react'
 
 const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, onOpenSettings }) => {
   const [modal, setModal] = useState({ type: '', visible: false })
@@ -37,7 +38,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, 
     <div className="toolbar">
       <div className="toolbar-content">
         <div className="toolbar-title">
-          <span className="title-icon">💬</span>
+          <Bot size={20} className="title-icon" />
           <span className="title-text">MaiMbot</span>
         </div>
         
@@ -49,7 +50,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, 
             onClick={() => openModal('bg')}
             title="更换背景"
           >
-            <span className="btn-icon">🖼️</span>
+            <Image size={14} className="btn-icon" />
             <span className="btn-text">背景</span>
           </button>
           
@@ -58,7 +59,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, 
             onClick={() => openModal('sprite')}
             title="更换立绘"
           >
-            <span className="btn-icon">🎭</span>
+            <User size={14} className="btn-icon" />
             <span className="btn-text">立绘</span>
           </button>
           
@@ -67,7 +68,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, 
             onClick={onAvatarConfig}
             title="头像设置"
           >
-            <span className="btn-icon">👤</span>
+            <UserCog size={14} className="btn-icon" />
             <span className="btn-text">头像</span>
           </button>
 
@@ -76,7 +77,7 @@ const Toolbar = ({ onChangeBackground, onChangeSprite, apiBase, onAvatarConfig, 
             onClick={onOpenSettings}
             title="应用设置"
           >
-            <span className="btn-icon">⚙️</span>
+            <Settings size={14} className="btn-icon" />
             <span className="btn-text">设置</span>
           </button>
         </div>

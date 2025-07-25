@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Send, Paperclip, User, Bot } from 'lucide-react'
 
 const ChatPanel = ({ messages, onSend, onSendImage, avatarConfig }) => {
   const [input, setInput] = useState('')
@@ -87,7 +88,7 @@ const ChatPanel = ({ messages, onSend, onSendImage, avatarConfig }) => {
                   {avatar ? (
                     <img src={avatar} alt={name} />
                   ) : (
-                    <div className="default-avatar">🤖</div>
+                    <div className="default-avatar"><Bot size={20} /></div>
                   )}
                 </div>
               )}
@@ -120,7 +121,7 @@ const ChatPanel = ({ messages, onSend, onSendImage, avatarConfig }) => {
                   {avatar ? (
                     <img src={avatar} alt={name} />
                   ) : (
-                    <div className="default-avatar">👤</div>
+                    <div className="default-avatar"><User size={20} /></div>
                   )}
                 </div>
               )}
@@ -156,7 +157,7 @@ const ChatPanel = ({ messages, onSend, onSendImage, avatarConfig }) => {
             disabled={!input.trim()}
             title="发送消息"
           >
-            发送
+            ✉️
           </button>
         </div>
 

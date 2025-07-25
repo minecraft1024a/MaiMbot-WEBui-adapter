@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { themeAPI, apiKeyAPI, databaseAPI } from '../utils/api'
 
-const SettingsPanel = ({ onClose, apiBase }) => {
+const SettingsPanel = ({ onClose }) => {
   const [settings, setSettings] = useState(() => {
     // 从localStorage加载已保存的设置
     const saved = localStorage.getItem('appSettings')

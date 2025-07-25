@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import { Upload, Trash2, UserCog } from 'lucide-react'
 
 const SpritePanel = ({ sprite, onChange, onAvatarConfig }) => {
   const fileInputRef = useRef(null)
@@ -67,7 +68,7 @@ const SpritePanel = ({ sprite, onChange, onAvatarConfig }) => {
         ) : (
           <div className="sprite-placeholder">
             <div className="placeholder-content">
-              <div className="placeholder-icon">🖼️</div>
+              <div className="placeholder-icon"><Upload size={48} /></div>
               <div className="placeholder-text">暂无立绘</div>
               <div className="placeholder-hint">点击下方按钮上传</div>
             </div>
@@ -83,6 +84,7 @@ const SpritePanel = ({ sprite, onChange, onAvatarConfig }) => {
           disabled={isLoading}
           title="更换立绘"
         >
+          <Upload size={16} />
           {sprite ? '更换立绘' : '上传立绘'}
         </button>
         
@@ -93,6 +95,7 @@ const SpritePanel = ({ sprite, onChange, onAvatarConfig }) => {
             disabled={isLoading}
             title="清除立绘"
           >
+            <Trash2 size={16} />
             清除
           </button>
         )}
@@ -102,6 +105,7 @@ const SpritePanel = ({ sprite, onChange, onAvatarConfig }) => {
           onClick={onAvatarConfig}
           title="配置头像"
         >
+          <UserCog size={16} />
           头像设置
         </button>
       </div>

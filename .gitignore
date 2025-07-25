@@ -1,1 +1,3 @@
 adapter/requirements.txt
+http_server/backend/chat.db
+node_modules/
